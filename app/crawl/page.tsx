@@ -46,9 +46,23 @@ export default function CrawlPage() {
     setError("");
     setSelected(new Set());
     try {
-      const res = await fetch("/api/crawl", { method: "POST" });
-      if (!res.ok) throw new Error();
-      setResults(await res.json());
+      const categories = ["창업", "장학", "대외활동", "공모전"];
+      const settled = await Promise.allSettled(
+        categories.map((cat) =>
+          fetch("/api/crawl", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ category: cat }),
+          }).then((r) => r.json() as Promise<{ activities?: Activity[] }>)
+        )
+      );
+      const allActivities = settled
+        .filter((r): r is PromiseFulfilledResult<{ activities: Activity[] }> =>
+          r.status === "fulfilled" && Array.isArray(r.value.activities)
+        )
+        .flatMap((r) => r.value.activities);
+      if (allActivities.length === 0) throw new Error();
+      setResults({ crawledAt: new Date().toISOString(), activities: allActivities });
     } catch {
       setError("수집 중 오류가 발생했어요. 다시 시도해주세요.");
     } finally {

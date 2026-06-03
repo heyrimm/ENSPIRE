@@ -148,8 +148,30 @@ async function runCrawl(): Promise<CrawlResults> {
   return results;
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    let body: { category?: string } = {};
+    try { body = await request.json(); } catch {}
+
+    if (body.category) {
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) throw new Error("GEMINI_API_KEY 없음");
+      const genAI = new GoogleGenerativeAI(apiKey);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const model = (genAI as any).getGenerativeModel({
+        model: "gemini-2.5-flash",
+        tools: [{ googleSearch: {} }],
+      });
+      const today = new Date();
+      const todayStr = fmt(today);
+      const minDate = new Date(today);
+      minDate.setDate(minDate.getDate() + 3);
+      const minDateStr = fmt(minDate);
+      const activities = await searchCategory(model, body.category, todayStr, minDateStr);
+      console.log(`[크롤] ${body.category}: ${activities.length}개`);
+      return NextResponse.json({ activities });
+    }
+
     const results = await runCrawl();
     return NextResponse.json(results);
   } catch (e: unknown) {
