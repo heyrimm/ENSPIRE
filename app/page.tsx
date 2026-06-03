@@ -148,9 +148,10 @@ export default function Home() {
           .page-inner { max-width: 1280px; }
           .desktop-grid {
             display: grid;
-            grid-template-columns: 480px 1fr;
+            grid-template-columns: 480px 420px;
             gap: 40px;
             align-items: start;
+            justify-content: center;
           }
           .desktop-sticky { position: sticky; top: 40px; }
           .desktop-only { display: block; }
