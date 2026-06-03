@@ -142,6 +142,8 @@ export default function Home() {
         .page-wrapper { padding: 28px 18px 48px; }
         .page-inner { max-width: 480px; margin: 0 auto; }
         .desktop-only { display: none; }
+        .crawl-desktop-header { display: none; }
+        .crawl-mobile-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 
         @media (min-width: 768px) {
           .page-wrapper { padding: 40px 60px 60px; }
@@ -155,6 +157,8 @@ export default function Home() {
           }
           .desktop-sticky { position: sticky; top: 40px; }
           .desktop-only { display: block; }
+          .crawl-desktop-header { display: flex; justify-content: space-between; align-items: center; max-width: 940px; margin: 0 auto 18px; }
+          .crawl-mobile-header { display: none !important; }
         }
       `}</style>
 
@@ -211,6 +215,19 @@ export default function Home() {
           </div>
         </div>
 
+        {/* 크롤 선택 모드 데스크톱 헤더 */}
+        {isCrawlMode && (
+          <div className="crawl-desktop-header">
+            <Link href="/crawl" style={{ fontSize: "13px", color: theme.gold, textDecoration: "none", fontWeight: 700 }}>
+              ← 다시 선택
+            </Link>
+            <span style={{ fontSize: "13px", fontWeight: 700, color: theme.gold, background: "rgba(245,200,66,0.15)", padding: "5px 18px", borderRadius: "50px" }}>
+              {crawlActivities.length}개 선택됨
+            </span>
+            <div style={{ width: "80px" }} />
+          </div>
+        )}
+
         {/* 메인 콘텐츠: 모바일 1열 / 데스크톱 2열 */}
         <div className="desktop-grid">
           {/* 왼쪽: 입력 영역 */}
@@ -218,7 +235,7 @@ export default function Home() {
             {isCrawlMode ? (
               /* ── 크롤 선택 모드 ── */
               <div style={{ animation: "fadeUp 0.25s ease" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                <div className="crawl-mobile-header">
                   <Link href="/crawl" style={{
                     fontSize: "13px", color: theme.gold, textDecoration: "none",
                     fontWeight: 700, display: "flex", alignItems: "center", gap: "1px",
