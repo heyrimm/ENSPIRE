@@ -89,20 +89,31 @@ async function saveToNotion(notice: string) {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  await Promise.all(
-    programs.map((p) =>
-      notion.pages.create({
-        parent: { database_id: databaseId },
-        properties: {
-          "프로그램 명": { title: [{ text: { content: p.name } }] },
-          "공지글": { rich_text: noticeChunks },
-          "프로그램 링크": { url: p.link },
-          "모집기한": p.deadline ? { date: { start: p.deadline } } : { date: null },
-          "게시일": { date: { start: today } },
-        },
-      })
-    )
-  );
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await Promise.all(
+        programs.map((p) =>
+          notion.pages.create({
+            parent: { database_id: databaseId },
+            properties: {
+              "프로그램 명": { title: [{ text: { content: p.name } }] },
+              "공지글": { rich_text: noticeChunks },
+              "프로그램 링크": { url: p.link },
+              "모집기한": p.deadline ? { date: { start: p.deadline } } : { date: null },
+              "게시일": { date: { start: today } },
+            },
+          })
+        )
+      );
+      return;
+    } catch (e: unknown) {
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+        continue;
+      }
+      throw e;
+    }
+  }
 }
 
 async function crawlUrl(url: string): Promise<string> {
